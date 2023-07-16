@@ -19,6 +19,7 @@ const HomeScreen = ({ navigation }) => {
     minDate: '',
     maxDate: '',
   });
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -50,6 +51,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const showExpenseModal = () => {
+    setExpenseToEdit(null);
+    setExpenseModalVisible(true);
+  };
+
+  const showEditExpenseModal = (expense: Expense) => {
+    setExpenseToEdit(expense);
     setExpenseModalVisible(true);
   };
 
@@ -67,6 +74,16 @@ const HomeScreen = ({ navigation }) => {
 
   const createExpense = async (newExpense: Expense) => {
     const updatedExpenses = [...expenses, newExpense];
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setExpenses(updatedExpenses);
+    hideExpenseModal();
+    calculateTotalAmount();
+  };
+
+  const editExpense = async (editedExpense: Expense) => {
+    const updatedExpenses = expenses.map((expense) =>
+      expense.id === editedExpense.id ? editedExpense : expense
+    );
     await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
     setExpenses(updatedExpenses);
     hideExpenseModal();
@@ -106,6 +123,7 @@ const HomeScreen = ({ navigation }) => {
       <Text style={styles.expenseText}>{item.title}</Text>
       <Text style={styles.expenseText}>{item.amount}</Text>
       <Text style={styles.expenseText}>{item.date}</Text>
+      <Button title="Edit" onPress={() => showEditExpenseModal(item)} />
     </View>
   );
 
@@ -126,7 +144,9 @@ const HomeScreen = ({ navigation }) => {
       <ExpenseModal
         visible={isExpenseModalVisible}
         onSave={createExpense}
+        onEdit={editExpense}
         onCancel={hideExpenseModal}
+        expenseToEdit={expenseToEdit}
       />
 
       <FiltersModal
@@ -136,7 +156,6 @@ const HomeScreen = ({ navigation }) => {
         onClearFilters={clearFilters}
         onClose={hideFiltersModal}
       />
-
     </View>
   );
 };
