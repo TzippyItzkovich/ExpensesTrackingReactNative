@@ -14,12 +14,10 @@ const HomeScreen = ({ navigation }) => {
   const [isFiltersModalVisible, setFiltersModalVisible] = useState(false);
   const [filters, setFilters] = useState({
     title: '',
-    minAmount: '',
-    maxAmount: '',
-    minDate: '',
-    maxDate: '',
+    amount: '',
+    date: '',
   });
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | undefined>(undefined); // Add expenseToEdit state
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | undefined>(undefined);
 
   useEffect(() => {
     fetchData();
@@ -56,7 +54,7 @@ const HomeScreen = ({ navigation }) => {
 
   const hideExpenseModal = () => {
     setExpenseModalVisible(false);
-    setExpenseToEdit(undefined); // Clear expenseToEdit when hiding the modal
+    setExpenseToEdit(undefined);
   };
 
   const showFiltersModal = () => {
@@ -92,14 +90,16 @@ const HomeScreen = ({ navigation }) => {
 
   const filterExpenses = (filters) => {
     const filteredData = expenses.filter((expense) => {
-      const titleMatch = expense.title.toLowerCase().includes(filters.title.toLowerCase());
+      const titleMatch = filters.title
+        ? expense.title.toLowerCase().includes(filters.title.toLowerCase())
+        : true;
       const amountMatch =
-        filters.minAmount !== '' && filters.maxAmount !== ''
-          ? Number(expense.amount) >= Number(filters.minAmount) && Number(expense.amount) <= Number(filters.maxAmount)
+        filters.amount !== ''
+          ? Number(expense.amount) === Number(filters.amount)
           : true;
       const dateMatch =
-        filters.minDate !== '' && filters.maxDate !== ''
-          ? new Date(expense.date) >= new Date(filters.minDate) && new Date(expense.date) <= new Date(filters.maxDate)
+        filters.date !== ''
+          ? new Date(expense.date).toDateString() === new Date(filters.date).toDateString()
           : true;
       return titleMatch && amountMatch && dateMatch;
     });
@@ -110,10 +110,8 @@ const HomeScreen = ({ navigation }) => {
   const clearFilters = () => {
     setFilters({
       title: '',
-      minAmount: '',
-      maxAmount: '',
-      minDate: '',
-      maxDate: '',
+      amount: '',
+      date: '',
     });
     setFilteredExpenses([]);
   };

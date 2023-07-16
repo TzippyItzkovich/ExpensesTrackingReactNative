@@ -1,78 +1,67 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TextInput, Button, StyleSheet } from 'react-native';
-import { Filters } from './types';
 
-type Props = {
-  visible: boolean;
-  filters: Filters;
-  onFilter: (filters: Filters) => void;
-  onClearFilters: () => void;
-  onClose: () => void;
-};
+const FiltersModal = ({ visible, filters, onFilter, onClearFilters, onClose }) => {
+  const [title, setTitle] = useState(filters.title);
+  const [amount, setAmount] = useState(filters.amount);
+  const [date, setDate] = useState(filters.date);
 
-const FiltersModal: React.FC<Props> = ({ visible, filters, onFilter, onClearFilters, onClose }) => {
-  const [localFilters, setLocalFilters] = useState<Filters>(filters);
-
-  const filterExpenses = () => {
-    onFilter(localFilters);
+  const handleFilter = () => {
+    const updatedFilters = {
+      title: title.trim(),
+      amount: amount.trim(),
+      date: date.trim(),
+    };
+    onFilter(updatedFilters);
   };
 
   const handleClearFilters = () => {
-    setLocalFilters({
-      title: '',
-      minAmount: '',
-      maxAmount: '',
-      minDate: '',
-      maxDate: '',
-    });
+    setTitle('');
+    setAmount('');
+    setDate('');
     onClearFilters();
-  };
-
-  const handleClose = () => {
-    setLocalFilters(filters);
-    onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
         <Text style={styles.heading}>Filters</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Title"
-          value={localFilters.title}
-          onChangeText={(text) => setLocalFilters((prevFilters) => ({ ...prevFilters, title: text }))}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Min Amount"
-          value={localFilters.minAmount}
-          onChangeText={(text) => setLocalFilters((prevFilters) => ({ ...prevFilters, minAmount: text }))}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Max Amount"
-          value={localFilters.maxAmount}
-          onChangeText={(text) => setLocalFilters((prevFilters) => ({ ...prevFilters, maxAmount: text }))}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Min Date"
-          value={localFilters.minDate}
-          onChangeText={(text) => setLocalFilters((prevFilters) => ({ ...prevFilters, minDate: text }))}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Max Date"
-          value={localFilters.maxDate}
-          onChangeText={(text) => setLocalFilters((prevFilters) => ({ ...prevFilters, maxDate: text }))}
-        />
-        <View style={styles.buttonsContainer}>
-          <Button title="Filter" onPress={filterExpenses} />
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Title</Text>
+          <TextInput
+            style={styles.input}
+            value={title}
+            onChangeText={(text) => setTitle(text)}
+            placeholder="Enter title"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Amount</Text>
+          <TextInput
+            style={styles.input}
+            value={amount}
+            onChangeText={(text) => setAmount(text)}
+            placeholder="Enter amount"
+            keyboardType="numeric"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Date</Text>
+          <TextInput
+            style={styles.input}
+            value={date}
+            onChangeText={(text) => setDate(text)}
+            placeholder="Enter date"
+          />
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <Button title="Apply Filters" onPress={handleFilter} />
           <Button title="Clear Filters" onPress={handleClearFilters} />
-          <Button title="Close" onPress={handleClose} />
+          <Button title="Close" onPress={onClose} />
         </View>
       </View>
     </Modal>
@@ -87,16 +76,22 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  inputContainer: {
     marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
+    borderColor: 'lightgray',
     padding: 10,
-    marginBottom: 10,
+    fontSize: 16,
   },
-  buttonsContainer: {
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
