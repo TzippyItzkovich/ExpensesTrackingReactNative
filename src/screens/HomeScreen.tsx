@@ -19,7 +19,7 @@ const HomeScreen = ({ navigation }) => {
     minDate: '',
     maxDate: '',
   });
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | undefined>(undefined); // Add expenseToEdit state
 
   useEffect(() => {
     fetchData();
@@ -51,17 +51,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const showExpenseModal = () => {
-    setExpenseToEdit(null);
-    setExpenseModalVisible(true);
-  };
-
-  const showEditExpenseModal = (expense: Expense) => {
-    setExpenseToEdit(expense);
     setExpenseModalVisible(true);
   };
 
   const hideExpenseModal = () => {
     setExpenseModalVisible(false);
+    setExpenseToEdit(undefined); // Clear expenseToEdit when hiding the modal
   };
 
   const showFiltersModal = () => {
@@ -80,14 +75,19 @@ const HomeScreen = ({ navigation }) => {
     calculateTotalAmount();
   };
 
-  const editExpense = async (editedExpense: Expense) => {
+  const editExpense = async (updatedExpense: Expense) => {
     const updatedExpenses = expenses.map((expense) =>
-      expense.id === editedExpense.id ? editedExpense : expense
+      expense.id === updatedExpense.id ? updatedExpense : expense
     );
     await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
     setExpenses(updatedExpenses);
     hideExpenseModal();
-    calculateTotalAmount();
+  };
+
+  const removeExpense = async (expenseId: string) => {
+    const updatedExpenses = expenses.filter((expense) => expense.id !== expenseId);
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setExpenses(updatedExpenses);
   };
 
   const filterExpenses = (filters) => {
@@ -118,14 +118,24 @@ const HomeScreen = ({ navigation }) => {
     setFilteredExpenses([]);
   };
 
-  const renderExpense = ({ item }: { item: Expense }) => (
+  const renderItem = ({ item }: { item: Expense }) => (
     <View style={styles.expenseContainer}>
       <Text style={styles.expenseText}>{item.title}</Text>
       <Text style={styles.expenseText}>{item.amount}</Text>
       <Text style={styles.expenseText}>{item.date}</Text>
-      <Button title="Edit" onPress={() => showEditExpenseModal(item)} />
+      <Button title="Edit" onPress={() => handleEditExpense(item)} />
+      <Button title="Remove" onPress={() => handleRemoveExpense(item.id)} />
     </View>
   );
+
+  const handleEditExpense = (expense: Expense) => {
+    setExpenseToEdit(expense);
+    setExpenseModalVisible(true);
+  };
+
+  const handleRemoveExpense = (expenseId: string) => {
+    removeExpense(expenseId);
+  };
 
   return (
     <View style={styles.container}>
@@ -137,7 +147,7 @@ const HomeScreen = ({ navigation }) => {
 
       <FlatList
         data={filteredExpenses.length > 0 ? filteredExpenses : expenses}
-        renderItem={renderExpense}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
 
