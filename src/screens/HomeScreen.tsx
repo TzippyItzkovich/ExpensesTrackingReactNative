@@ -5,7 +5,7 @@ import ExpenseModal from './ExpenseModal';
 import FiltersModal from './FiltersModal';
 import { Expense } from './types';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
@@ -32,6 +32,7 @@ const HomeScreen = () => {
     }
     setFullName(name);
     calculateTotalAmount();
+    updateNavigationTitle(name);
   };
 
   const calculateTotalAmount = () => {
@@ -40,6 +41,12 @@ const HomeScreen = () => {
       amount += Number(expense.amount);
     });
     setTotalAmount(amount);
+  };
+
+  const updateNavigationTitle = (name) => {
+    navigation.setOptions({
+      title: `Welcome, ${name}`,
+    });
   };
 
   const showExpenseModal = () => {
@@ -82,7 +89,6 @@ const HomeScreen = () => {
     setFilteredExpenses(filteredData);
     hideFiltersModal();
   };
-
 
   const clearFilters = () => {
     setFilters({
