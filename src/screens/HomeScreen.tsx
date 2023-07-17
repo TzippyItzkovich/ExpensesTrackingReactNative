@@ -27,7 +27,9 @@ const HomeScreen = ({ navigation }) => {
     const name = await AsyncStorage.getItem('fullName');
     const expensesData = await AsyncStorage.getItem('expenses');
     if (expensesData) {
-      setExpenses(JSON.parse(expensesData));
+      const parsedExpenses = JSON.parse(expensesData);
+      const sortedExpenses = parsedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setExpenses(sortedExpenses);
     }
     setFullName(name);
     calculateTotalAmount();
@@ -67,8 +69,9 @@ const HomeScreen = ({ navigation }) => {
 
   const createExpense = async (newExpense: Expense) => {
     const updatedExpenses = [...expenses, newExpense];
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
+    const sortedExpenses = updatedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
+    setExpenses(sortedExpenses);
     hideExpenseModal();
     calculateTotalAmount();
   };
@@ -77,8 +80,9 @@ const HomeScreen = ({ navigation }) => {
     const updatedExpenses = expenses.map((expense) =>
       expense.id === updatedExpense.id ? updatedExpense : expense
     );
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
+    const sortedExpenses = updatedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
+    setExpenses(sortedExpenses);
     hideExpenseModal();
   };
 
