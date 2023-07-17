@@ -27,8 +27,9 @@ const HomeScreen = ({ navigation }) => {
     const expensesData = await AsyncStorage.getItem('expenses');
     if (expensesData) {
       const parsedExpenses = JSON.parse(expensesData);
-      setExpenses(parsedExpenses);
-      calculateTotalAmount(parsedExpenses);
+      const sortedExpenses = sortExpensesByDate(parsedExpenses);
+      setExpenses(sortedExpenses);
+      calculateTotalAmount(sortedExpenses);
     }
     setFullName(name);
     updateNavigationTitle(name);
@@ -67,25 +68,28 @@ const HomeScreen = ({ navigation }) => {
 
   const createExpense = async (newExpense) => {
     const updatedExpenses = [...expenses, newExpense];
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
+    const sortedExpenses = sortExpensesByDate(updatedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
+    setExpenses(sortedExpenses);
     hideExpenseModal();
-    calculateTotalAmount(updatedExpenses);
+    calculateTotalAmount(sortedExpenses);
   };
 
   const editExpense = async (updatedExpense) => {
     const updatedExpenses = expenses.map((expense) =>
       expense.id === updatedExpense.id ? updatedExpense : expense
     );
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
+    const sortedExpenses = sortExpensesByDate(updatedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
+    setExpenses(sortedExpenses);
     hideExpenseModal();
   };
 
   const removeExpense = async (expenseId) => {
     const updatedExpenses = expenses.filter((expense) => expense.id !== expenseId);
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
+    const sortedExpenses = sortExpensesByDate(updatedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
+    setExpenses(sortedExpenses);
   };
 
   const filterExpenses = (filters) => {
@@ -101,9 +105,10 @@ const HomeScreen = ({ navigation }) => {
           : true;
       return titleMatch && amountMatch && dateMatch;
     });
-    setExpenses(filteredData);
+    const sortedExpenses = sortExpensesByDate(filteredData);
+    setExpenses(sortedExpenses);
     hideFiltersModal();
-    calculateTotalAmount(filteredData);
+    calculateTotalAmount(sortedExpenses);
   };
 
   const clearFilters = () => {
@@ -114,6 +119,11 @@ const HomeScreen = ({ navigation }) => {
     });
     fetchData();
   };
+
+  const sortExpensesByDate = (expenses: Expense[]) => {
+    return expenses.sort((a: Expense, b: Expense) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  };
+  
 
   const renderItem = ({ item }) => (
     <View style={styles.expenseContainer} key={item.id}>
