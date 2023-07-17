@@ -45,7 +45,8 @@ const HomeScreen = ({ navigation }) => {
 
   const updateNavigationTitle = (name) => {
     navigation.setOptions({
-      title: `Welcome, ${name}`,
+      title: name,
+      tabBarLabel: "Home",
     });
   };
 
@@ -158,7 +159,6 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Welcome, {fullName}</Text>
       <Text style={styles.totalAmount}>Total amount spent: {totalAmount}</Text>
 
       <Button title="Add Expense" onPress={showExpenseModal} />
