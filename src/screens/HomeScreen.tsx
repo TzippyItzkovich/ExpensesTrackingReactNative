@@ -7,7 +7,7 @@ import { Expense } from './types';
 
 const HomeScreen = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isExpenseModalVisible, setExpenseModalVisible] = useState(false);
   const [isFiltersModalVisible, setFiltersModalVisible] = useState(false);
@@ -116,7 +116,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.expenseContainer}>
+    <View style={styles.expenseContainer} key={item.id}>
       <Text style={styles.expenseText}>{item.title}</Text>
       <Text style={styles.expenseText}>{item.amount}</Text>
       <Text style={styles.expenseText}>{item.date}</Text>

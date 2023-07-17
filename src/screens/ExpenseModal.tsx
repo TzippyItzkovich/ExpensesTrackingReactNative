@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Modal, StyleSheet } from 'react-native';
 import { Expense } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 type ExpenseModalProps = {
   visible: boolean;
@@ -26,21 +27,21 @@ const ExpenseModal = ({ visible, onSave, onEdit, onCancel, expenseToEdit }: Expe
   }, [expenseToEdit]);
 
   const handleSave = () => {
-    const newExpense: Expense = {
-      id: expenseToEdit ? expenseToEdit.id : '',
+    const newExpense = {
+      id: expenseToEdit ? expenseToEdit.id : uuidv4(), // Assign a unique ID using uuidv4()
       title,
       amount: Number(amount),
       date,
     };
-
+  
     if (expenseToEdit) {
       onEdit(newExpense);
     } else {
       onSave(newExpense);
     }
-
+  
     clearFields();
-  };
+  };  
 
   const clearFields = () => {
     setTitle('');
