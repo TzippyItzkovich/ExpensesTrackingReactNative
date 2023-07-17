@@ -7,8 +7,7 @@ import { Expense } from './types';
 
 const HomeScreen = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isExpenseModalVisible, setExpenseModalVisible] = useState(false);
   const [isFiltersModalVisible, setFiltersModalVisible] = useState(false);
@@ -17,7 +16,7 @@ const HomeScreen = ({ navigation }) => {
     amount: '',
     date: '',
   });
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | undefined>(undefined);
+  const [expenseToEdit, setExpenseToEdit] = useState(undefined);
 
   useEffect(() => {
     fetchData();
@@ -28,17 +27,16 @@ const HomeScreen = ({ navigation }) => {
     const expensesData = await AsyncStorage.getItem('expenses');
     if (expensesData) {
       const parsedExpenses = JSON.parse(expensesData);
-      const sortedExpenses = parsedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setExpenses(sortedExpenses);
+      setExpenses(parsedExpenses);
+      calculateTotalAmount(parsedExpenses);
     }
     setFullName(name);
-    calculateTotalAmount();
     updateNavigationTitle(name);
   };
 
-  const calculateTotalAmount = () => {
+  const calculateTotalAmount = (data) => {
     let amount = 0;
-    expenses.forEach((expense) => {
+    data.forEach((expense) => {
       amount += Number(expense.amount);
     });
     setTotalAmount(amount);
@@ -67,26 +65,24 @@ const HomeScreen = ({ navigation }) => {
     setFiltersModalVisible(false);
   };
 
-  const createExpense = async (newExpense: Expense) => {
+  const createExpense = async (newExpense) => {
     const updatedExpenses = [...expenses, newExpense];
-    const sortedExpenses = updatedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
-    setExpenses(sortedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setExpenses(updatedExpenses);
     hideExpenseModal();
-    calculateTotalAmount();
+    calculateTotalAmount(updatedExpenses);
   };
 
-  const editExpense = async (updatedExpense: Expense) => {
+  const editExpense = async (updatedExpense) => {
     const updatedExpenses = expenses.map((expense) =>
       expense.id === updatedExpense.id ? updatedExpense : expense
     );
-    const sortedExpenses = updatedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-    await AsyncStorage.setItem('expenses', JSON.stringify(sortedExpenses));
-    setExpenses(sortedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setExpenses(updatedExpenses);
     hideExpenseModal();
   };
 
-  const removeExpense = async (expenseId: string) => {
+  const removeExpense = async (expenseId) => {
     const updatedExpenses = expenses.filter((expense) => expense.id !== expenseId);
     await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
     setExpenses(updatedExpenses);
@@ -98,17 +94,16 @@ const HomeScreen = ({ navigation }) => {
         ? expense.title.toLowerCase().includes(filters.title.toLowerCase())
         : true;
       const amountMatch =
-        filters.amount !== ''
-          ? Number(expense.amount) === Number(filters.amount)
-          : true;
+        filters.amount !== '' ? Number(expense.amount) === Number(filters.amount) : true;
       const dateMatch =
         filters.date !== ''
           ? new Date(expense.date).toDateString() === new Date(filters.date).toDateString()
           : true;
       return titleMatch && amountMatch && dateMatch;
     });
-    setFilteredExpenses(filteredData);
+    setExpenses(filteredData);
     hideFiltersModal();
+    calculateTotalAmount(filteredData);
   };
 
   const clearFilters = () => {
@@ -117,10 +112,10 @@ const HomeScreen = ({ navigation }) => {
       amount: '',
       date: '',
     });
-    setFilteredExpenses([]);
+    fetchData();
   };
 
-  const renderItem = ({ item }: { item: Expense }) => (
+  const renderItem = ({ item }) => (
     <View style={styles.expenseContainer}>
       <Text style={styles.expenseText}>{item.title}</Text>
       <Text style={styles.expenseText}>{item.amount}</Text>
@@ -130,12 +125,12 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
-  const handleEditExpense = (expense: Expense) => {
+  const handleEditExpense = (expense) => {
     setExpenseToEdit(expense);
     setExpenseModalVisible(true);
   };
 
-  const handleRemoveExpense = (expenseId: string) => {
+  const handleRemoveExpense = (expenseId) => {
     removeExpense(expenseId);
   };
 
@@ -160,7 +155,7 @@ const HomeScreen = ({ navigation }) => {
       <Button title="Filter Expenses" onPress={showFiltersModal} />
 
       <SectionList
-        sections={filteredExpenses.length > 0 ? sectionedExpenses : sectionedExpenses}
+        sections={sectionedExpenses}
         renderItem={renderItem}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
