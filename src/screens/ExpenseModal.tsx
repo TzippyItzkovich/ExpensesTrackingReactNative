@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Modal, StyleSheet } from 'react-native';
 import { Expense } from './types';
 
@@ -14,6 +14,16 @@ const ExpenseModal = ({ visible, onSave, onEdit, onCancel, expenseToEdit }: Expe
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
+
+  useEffect(() => {
+    if (expenseToEdit) {
+      setTitle(expenseToEdit.title);
+      setAmount(expenseToEdit.amount.toString());
+      setDate(expenseToEdit.date);
+    } else {
+      clearFields();
+    }
+  }, [expenseToEdit]);
 
   const handleSave = () => {
     const newExpense: Expense = {
