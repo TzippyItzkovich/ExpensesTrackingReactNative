@@ -4,9 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ExpenseModal from './ExpenseModal';
 import FiltersModal from './FiltersModal';
 import { Expense } from './types';
+import { Ionicons } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
-  const [fullName, setFullName] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isExpenseModalVisible, setExpenseModalVisible] = useState(false);
@@ -27,11 +27,9 @@ const HomeScreen = ({ navigation }) => {
     const expensesData = await AsyncStorage.getItem('expenses');
     if (expensesData) {
       const parsedExpenses = JSON.parse(expensesData);
-      const sortedExpenses = sortExpensesByDate(parsedExpenses);
-      setExpenses(sortedExpenses);
-      calculateTotalAmount(sortedExpenses);
+      setExpenses(parsedExpenses);
+      calculateTotalAmount(parsedExpenses);
     }
-    setFullName(name);
     updateNavigationTitle(name);
   };
 
@@ -159,11 +157,27 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.totalAmount}>Total amount spent: {totalAmount}</Text>
-
-      <Button title="Add Expense" onPress={showExpenseModal} />
-      <Button title="Filter Expenses" onPress={showFiltersModal} />
-
+      <View style={styles.headerContainer}>
+        <Text style={styles.totalAmount}>Total amount spent: {totalAmount}</Text>
+      </View>
+      <View style={styles.filterContainer}>
+        <Button
+          title="Filter Expenses"
+          onPress={showFiltersModal}
+        />
+        <Ionicons
+          name="filter"
+          size={24}
+          onPress={showFiltersModal}
+          style={styles.filterIcon}
+        />
+      </View>
+      <View style={styles.addExpenseButtonContainer}>
+        <Button
+          title="Add Expense"
+          onPress={showExpenseModal}
+        />
+      </View>
       <SectionList
         sections={sectionedExpenses}
         renderItem={renderItem}
@@ -197,14 +211,33 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   heading: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   totalAmount: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  filterButton: {
+    marginRight: 10,
+  },
+  filterIcon: {
+    marginLeft: 5,
+  },
+  addExpenseButtonContainer: {
+    marginBottom: 10,
   },
   sectionHeader: {
     fontSize: 16,
