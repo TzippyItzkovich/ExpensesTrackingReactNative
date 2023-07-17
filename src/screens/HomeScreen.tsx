@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Button, SectionList, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ExpenseModal from './ExpenseModal';
 import FiltersModal from './FiltersModal';
@@ -135,6 +135,18 @@ const HomeScreen = ({ navigation }) => {
     removeExpense(expenseId);
   };
 
+  // Prepare the data for sectioning
+  const sectionedExpenses = expenses.reduce((acc, expense) => {
+    const date = new Date(expense.date).toDateString();
+    const section = acc.find((section) => section.title === date);
+    if (section) {
+      section.data.push(expense);
+    } else {
+      acc.push({ title: date, data: [expense] });
+    }
+    return acc;
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Welcome, {fullName}</Text>
@@ -143,9 +155,12 @@ const HomeScreen = ({ navigation }) => {
       <Button title="Add Expense" onPress={showExpenseModal} />
       <Button title="Filter Expenses" onPress={showFiltersModal} />
 
-      <FlatList
-        data={filteredExpenses.length > 0 ? filteredExpenses : expenses}
+      <SectionList
+        sections={filteredExpenses.length > 0 ? sectionedExpenses : sectionedExpenses}
         renderItem={renderItem}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
         keyExtractor={(item) => item.id}
       />
 
@@ -181,6 +196,11 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 16,
     marginBottom: 20,
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 20,
   },
   expenseContainer: {
     borderWidth: 1,
