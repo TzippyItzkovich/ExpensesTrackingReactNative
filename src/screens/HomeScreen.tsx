@@ -7,7 +7,7 @@ import { Expense } from './types';
 
 const HomeScreen = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
-  const [expenses, setExpenses] = useState([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isExpenseModalVisible, setExpenseModalVisible] = useState(false);
   const [isFiltersModalVisible, setFiltersModalVisible] = useState(false);
